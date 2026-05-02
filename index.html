@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aaltoliike-oppimispolku</title>
+    <style>
+      :root {
+        --bg: #f5efe1;
+        --panel: rgba(255, 251, 244, 0.9);
+        --panel-strong: #fffdf7;
+        --line: rgba(53, 74, 95, 0.16);
+        --text: #173047;
+        --muted: #586d80;
+        --accent: #d55d3f;
+        --accent-strong: #ad4128;
+        --accent-soft: rgba(213, 93, 63, 0.12);
+        --highlight: #0e8296;
+        --success: #1d7f4f;
+        --danger: #a34d35;
+        --shadow: 0 24px 60px rgba(25, 48, 71, 0.14);
+        --radius-lg: 28px;
+        --radius-md: 18px;
+        --radius-sm: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Georgia, Cambria, "Times New Roman", serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(14, 130, 150, 0.18), transparent 34%),
+          radial-gradient(circle at bottom right, rgba(213, 93, 63, 0.2), transparent 32%),
+          linear-gradient(180deg, #fbf6ea 0%, #f3ead9 52%, #e8dcc7 100%);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+        background-size: 34px 34px;
+        opacity: 0.2;
+      }
+
+      .page-shell {
+        position: relative;
+        width: min(1180px, calc(100% - 28px));
+        margin: 20px auto;
+        padding: 18px;
+        border-radius: 32px;
+        background: rgba(255, 250, 242, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .app-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        background: var(--panel);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      }
+
+      .hero {
+        padding: 22px 24px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .hero::after,
+      .visual-panel::after,
+      .controls-panel::after,
+      .lesson-panel::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.34), transparent 44%);
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        font-size: 0.88rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--highlight);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        line-height: 0.95;
+      }
+
+      .hero p {
+        margin: 12px 0 0;
+        max-width: 64ch;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .hero-tools {
+        display: grid;
+        gap: 10px;
+        justify-items: end;
+        min-width: 220px;
+      }
+
+      .progress-pill,
+      .mode-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(23, 48, 71, 0.08);
+        font-size: 0.96rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font: inherit;
+        cursor: pointer;
+        transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .primary-button {
+        background: var(--accent);
+        color: #fffaf4;
+      }
+
+      .primary-button:hover:not(:disabled) {
+        background: var(--accent-strong);
+      }
+
+      .secondary-button {
+        background: rgba(23, 48, 71, 0.08);
+        color: var(--text);
+      }
+
+      .visual-panel {
+        padding: 18px;
+      }
+
+      .visual-topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+      }
+
+      .visual-copy h2,
+      .controls-panel h2,
+      .lesson-panel h2 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .visual-copy p,
+      .lesson-copy p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .canvas-shell {
+        position: relative;
+        height: clamp(320px, 42vw, 520px);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at 16% 18%, rgba(213, 93, 63, 0.12), transparent 30%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(250, 244, 233, 0.9));
+        border: 1px solid rgba(23, 48, 71, 0.08);
+        overflow: hidden;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .controls-panel {
+        padding: 22px;
+      }
+
+      .control-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .control-card {
+        padding: 16px;
+        border-radius: 20px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(23, 48, 71, 0.08);
+      }
+
+      .control-card.is-locked {
+        background: rgba(127, 145, 160, 0.12);
+      }
+
+      .control-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: baseline;
+      }
+
+      .control-header strong {
+        font-size: 1.02rem;
+      }
+
+      .symbol {
+        color: var(--highlight);
+        font-style: italic;
+      }
+
+      .value-readout {
+        margin-top: 6px;
+        color: var(--muted);
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-top: 14px;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+
+      input[type="range"]:disabled {
+        cursor: not-allowed;
+        filter: grayscale(0.8);
+      }
+
+      .range-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.88rem;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+
+      .derived-strip {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .derived-card {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(14, 130, 150, 0.08), rgba(255, 255, 255, 0.86));
+        border: 1px solid rgba(14, 130, 150, 0.16);
+      }
+
+      .derived-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .derived-card strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 1.08rem;
+      }
+
+      .lesson-panel {
+        padding: 22px;
+      }
+
+      .lesson-topline {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+
+      .lesson-copy {
+        margin-top: 16px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .lesson-task {
+        padding: 16px;
+        border-radius: 20px;
+        background: rgba(213, 93, 63, 0.08);
+        border: 1px solid rgba(213, 93, 63, 0.16);
+      }
+
+      .lesson-task strong,
+      .lesson-task p {
+        margin: 0;
+      }
+
+      .lesson-task p {
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+
+      .answers {
+        display: grid;
+        gap: 10px;
+      }
+
+      .choice-button {
+        text-align: left;
+        border-radius: 18px;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid rgba(23, 48, 71, 0.12);
+        color: var(--text);
+      }
+
+      .choice-button.is-selected {
+        background: rgba(14, 130, 150, 0.12);
+        border-color: rgba(14, 130, 150, 0.38);
+      }
+
+      .feedback {
+        min-height: 28px;
+        font-size: 1rem;
+      }
+
+      .feedback[data-state="success"] {
+        color: var(--success);
+      }
+
+      .feedback[data-state="error"] {
+        color: var(--danger);
+      }
+
+      .lesson-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .summary-card {
+        display: none;
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at top right, rgba(14, 130, 150, 0.12), transparent 30%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 242, 229, 0.96));
+        border: 1px solid rgba(23, 48, 71, 0.1);
+      }
+
+      .summary-card.is-visible {
+        display: block;
+      }
+
+      .summary-grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .summary-item {
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(23, 48, 71, 0.08);
+      }
+
+      .summary-item span {
+        display: block;
+        color: var(--muted);
+      }
+
+      .summary-item strong {
+        display: block;
+        margin-top: 6px;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          flex-direction: column;
+        }
+
+        .hero-tools {
+          justify-items: start;
+          min-width: unset;
+        }
+
+        .hero-actions {
+          justify-content: flex-start;
+        }
+
+        .control-grid,
+        .derived-strip,
+        .summary-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          width: min(100% - 14px, 100%);
+          margin: 8px auto;
+          padding: 10px;
+          border-radius: 24px;
+        }
+
+        .hero,
+        .controls-panel,
+        .lesson-panel,
+        .visual-panel {
+          padding: 16px;
+        }
+
+        .canvas-shell {
+          height: 320px;
+        }
+
+        .control-grid,
+        .derived-strip,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 2.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-shell">
+      <div class="app-grid">
+        <header class="panel hero">
+          <div>
+            <p class="eyebrow">FY3 / FY7</p>
+            <h1>Aaltoliike-oppimispolku</h1>
+            <p>
+              Tutki, miten amplitudi, aallonpituus, taajuus, jaksonaika ja vaihe muokkaavat
+              siniaaltoa. Säädä arvoja ja tarkista oivalluksesi vaihe vaiheelta.
+            </p>
+          </div>
+          <div class="hero-tools">
+            <div class="progress-pill" id="progress-indicator">Vaihe 1 / 5</div>
+            <div class="mode-pill" id="view-indicator">Näkymä: paikka x (m)</div>
+            <div class="hero-actions">
+              <button class="secondary-button" id="toggle-motion">Pysäytä</button>
+              <button class="secondary-button" id="reset-app">Palauta alkuasetukset</button>
+            </div>
+          </div>
+        </header>
+
+        <section class="panel visual-panel">
+          <div class="visual-topline">
+            <div class="visual-copy">
+              <h2 id="canvas-title">Aallon liike</h2>
+              <p id="canvas-copy">
+                Aallonharja ja aallonpohja auttavat hahmottamaan poikkeamaa tasapainoasemasta.
+              </p>
+            </div>
+            <div class="mode-pill" id="status-indicator">Animaatio käynnissä</div>
+          </div>
+          <div class="canvas-shell">
+            <canvas id="wave-canvas" aria-describedby="canvas-description"></canvas>
+            <p class="sr-only" id="canvas-description">
+              Animoitu kuvaaja, jossa näytetään aallon poikkeama pystysuunnassa ja paikka tai
+              aika vaakasuunnassa.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel controls-panel">
+          <h2>Säätimet</h2>
+          <div class="control-grid" id="control-grid"></div>
+          <div class="derived-strip" id="derived-strip"></div>
+        </section>
+
+        <section class="panel lesson-panel">
+          <div class="lesson-topline">
+            <div>
+              <p class="eyebrow" id="lesson-step-label">Vaihe 1 / 5</p>
+              <h2 id="lesson-title">Tutustuminen</h2>
+            </div>
+            <div class="mode-pill" id="lesson-goal">Tavoite: simulaation hahmottaminen</div>
+          </div>
+          <div class="lesson-copy">
+            <p id="lesson-description"></p>
+            <div class="lesson-task">
+              <strong>Tehtävä</strong>
+              <p id="lesson-task"></p>
+            </div>
+            <div class="answers" id="lesson-answers"></div>
+            <div class="feedback" id="feedback" data-state=""></div>
+            <div class="lesson-actions">
+              <button class="primary-button" id="check-answer">Tarkista</button>
+              <button class="secondary-button" id="next-step" hidden>Seuraava vaihe</button>
+            </div>
+            <section class="summary-card" id="summary-card">
+              <h2>Hienoa! Olet oppinut aaltoliikkeen perusteet.</h2>
+              <p>
+                Olet kokeillut kaikkia viittä keskeistä parametria ja nähnyt, miten ne näkyvät
+                sekä kuvaajassa että yhtälöissä.
+              </p>
+              <div class="summary-grid" id="summary-grid"></div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const DEFAULT_PARAMS = {
+        amplitude: 1.0,
+        wavelength: 2.0,
+        frequency: 1.0,
+        phase: 0.0,
+      };
+
+      const SLIDERS = [
+        {
+          key: "amplitude",
+          label: "Amplitudi",
+          symbol: "A",
+          min: 0.1,
+          max: 2.0,
+          step: 0.1,
+          unit: "m",
+          digits: 1,
+        },
+        {
+          key: "wavelength",
+          label: "Aallonpituus",
+          symbol: "λ",
+          min: 0.5,
+          max: 5.0,
+          step: 0.1,
+          unit: "m",
+          digits: 1,
+        },
+        {
+          key: "frequency",
+          label: "Taajuus",
+          symbol: "f",
+          min: 0.1,
+          max: 5.0,
+          step: 0.1,
+          unit: "Hz",
+          digits: 1,
+        },
+        {
+          key: "phase",
+          label: "Vaihe",
+          symbol: "φ",
+          min: 0,
+          max: Math.PI * 2,
+          step: Math.PI / 8,
+          unit: "rad",
+          digits: 2,
+        },
+      ];
+
+      const STEPS = [
+        {
+          title: "Tutustuminen",
+          goal: "simulaation hahmottaminen",
+          description:
+            "Aaltoliike kuvaa etenevää värähtelyä. Tässä näkymässä vaakasuunnassa on paikka ja pystysuunnassa poikkeama tasapainoasemasta.",
+          task: "Liikuta säätimiä vapaasti. Mitä tapahtuu, kun muutat amplitudia?",
+          view: "space",
+          locks: [],
+          hint: "Amplitudi kertoo poikkeaman suurimman arvon tasapainoasemasta.",
+          answerType: "choice",
+          choices: [
+            "Amplitudi määrää, kuinka korkealle ja matalalle aalto ulottuu.",
+            "Amplitudi määrää, kuinka pitkä yksi aalto on.",
+            "Amplitudi määrää, kuinka monta värähdystä tapahtuu sekunnissa.",
+          ],
+          check: (state) => state.selectedChoice === 0,
+        },
+        {
+          title: "Amplitudi",
+          goal: "pystysuunnan venymän erottaminen",
+          description:
+            "Kun vain amplitudi muuttuu, aallon muoto säilyy mutta poikkeaman suurin arvo kasvaa tai pienenee.",
+          task: "Aseta amplitudi siten, että aallon huippu on tasolla 1,5 m.",
+          view: "space",
+          locks: ["wavelength", "frequency", "phase"],
+          hint: "Huipun korkeus tasapainoasemasta on sama kuin amplitudi.",
+          answerType: "slider",
+          check: (state) => Math.abs(state.params.amplitude - 1.5) < 0.05,
+        },
+        {
+          title: "Aallonpituus ja taajuus",
+          goal: "etenemisnopeuden hahmottaminen",
+          description:
+            "Aallonpituus ja taajuus ovat eri asioita, mutta yhdessä ne määräävät etenemisnopeuden yhtälöllä v = f · λ.",
+          task: "Etsi yhdistelmä, jossa aallon etenemisnopeus on noin 6 m/s.",
+          view: "space",
+          locks: ["amplitude", "phase"],
+          hint: "Käytä yhtälöä v = f · λ.",
+          answerType: "slider",
+          check: (state) => Math.abs(derivedValues(state.params).speed - 6) < 0.3,
+        },
+        {
+          title: "Jaksonaika",
+          goal: "taajuuden ja jaksonajan yhteys",
+          description:
+            "Nyt kuvaaja esittää poikkeamaa ajan funktiona. Jaksonaika kertoo, kuinka kauan yksi täysi värähdys kestää.",
+          task: "Säädä taajuus niin, että jaksonaika on 0,5 s.",
+          view: "time",
+          locks: ["amplitude", "wavelength", "phase"],
+          hint: "Muista yhteys T = 1/f.",
+          answerType: "slider",
+          check: (state) => Math.abs(derivedValues(state.params).period - 0.5) < 0.05,
+        },
+        {
+          title: "Vaihe",
+          goal: "vaihe-eron näkeminen siirtymänä",
+          description:
+            "Vertailuaalto pysyy paikallaan arvossa φ = 0. Säädä omaa aaltoasi niin, että se on vastakkaisvaiheessa vertailuaaltoon nähden.",
+          task: "Siirrä aaltoa siten, että se on vastakkaisvaiheessa vertailuaaltoon nähden.",
+          view: "space",
+          locks: ["amplitude", "wavelength", "frequency"],
+          hint: "Vastakkaisvaihe tarkoittaa puolen jakson siirtymää eli φ ≈ π rad.",
+          answerType: "slider",
+          check: (state) => Math.abs(normalizePhase(state.params.phase) - Math.PI) <= Math.PI / 8,
+        },
+      ];
+
+      const state = {
+        params: { ...DEFAULT_PARAMS },
+        stepIndex: 0,
+        selectedChoice: null,
+        feedback: "",
+        feedbackState: "",
+        attempts: STEPS.map(() => 0),
+        completedSteps: STEPS.map(() => false),
+        running: true,
+        pausedAtSeconds: 0,
+        animationStartMs: performance.now(),
+        finished: false,
+      };
+
+      const elements = {
+        progress: document.getElementById("progress-indicator"),
+        viewIndicator: document.getElementById("view-indicator"),
+        statusIndicator: document.getElementById("status-indicator"),
+        canvasTitle: document.getElementById("canvas-title"),
+        canvasCopy: document.getElementById("canvas-copy"),
+        controlGrid: document.getElementById("control-grid"),
+        derivedStrip: document.getElementById("derived-strip"),
+        lessonStepLabel: document.getElementById("lesson-step-label"),
+        lessonTitle: document.getElementById("lesson-title"),
+        lessonGoal: document.getElementById("lesson-goal"),
+        lessonDescription: document.getElementById("lesson-description"),
+        lessonTask: document.getElementById("lesson-task"),
+        lessonAnswers: document.getElementById("lesson-answers"),
+        feedback: document.getElementById("feedback"),
+        checkButton: document.getElementById("check-answer"),
+        nextButton: document.getElementById("next-step"),
+        summaryCard: document.getElementById("summary-card"),
+        summaryGrid: document.getElementById("summary-grid"),
+        toggleMotion: document.getElementById("toggle-motion"),
+        resetButton: document.getElementById("reset-app"),
+        canvas: document.getElementById("wave-canvas"),
+      };
+
+      function derivedValues(params) {
+        return {
+          period: 1 / params.frequency,
+          waveNumber: (2 * Math.PI) / params.wavelength,
+          angularFrequency: 2 * Math.PI * params.frequency,
+          speed: params.frequency * params.wavelength,
+        };
+      }
+
+      function formatNumber(value, digits = 2) {
+        return new Intl.NumberFormat("fi-FI", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        }).format(value);
+      }
+
+      function formatValue(value, unit, digits) {
+        return `${formatNumber(value, digits)} ${unit}`;
+      }
+
+      function normalizePhase(value) {
+        const turn = Math.PI * 2;
+        let normalized = value % turn;
+        if (normalized < 0) {
+          normalized += turn;
+        }
+        return normalized;
+      }
+
+      function currentStep() {
+        return STEPS[state.stepIndex];
+      }
+
+      function currentTimeSeconds(now = performance.now()) {
+        if (!state.running) {
+          return state.pausedAtSeconds;
+        }
+        return (now - state.animationStartMs) / 1000;
+      }
+
+      function applyStepDefaults() {
+        state.params = { ...DEFAULT_PARAMS };
+        state.selectedChoice = null;
+        state.feedback = "";
+        state.feedbackState = "";
+      }
+
+      function resetApp() {
+        state.stepIndex = 0;
+        state.selectedChoice = null;
+        state.feedback = "";
+        state.feedbackState = "";
+        state.attempts = STEPS.map(() => 0);
+        state.completedSteps = STEPS.map(() => false);
+        state.finished = false;
+        state.params = { ...DEFAULT_PARAMS };
+        state.running = true;
+        state.pausedAtSeconds = 0;
+        state.animationStartMs = performance.now();
+        renderUi();
+      }
+
+      function advanceStep() {
+        if (state.stepIndex >= STEPS.length - 1) {
+          return;
+        }
+        state.stepIndex += 1;
+        applyStepDefaults();
+        renderUi();
+      }
+
+      function setFeedback(message, type) {
+        state.feedback = message;
+        state.feedbackState = type;
+      }
+
+      function markCorrect() {
+        state.completedSteps[state.stepIndex] = true;
+        setFeedback("Oikein! Hyvää työtä.", "success");
+        if (state.stepIndex === STEPS.length - 1) {
+          state.finished = true;
+        }
+      }
+
+      function markIncorrect() {
+        state.attempts[state.stepIndex] += 1;
+        const hint = currentStep().hint;
+        if (state.attempts[state.stepIndex] >= 2) {
+          setFeedback(`Vihje: ${hint}`, "error");
+        } else {
+          setFeedback("Ei aivan. Kokeile uudelleen.", "error");
+        }
+      }
+
+      function checkCurrentStep() {
+        if (state.finished) {
+          return;
+        }
+        const step = currentStep();
+        if (step.answerType === "choice" && state.selectedChoice === null) {
+          setFeedback("Ei aivan. Kokeile uudelleen.", "error");
+          renderUi();
+          return;
+        }
+        if (step.check(state)) {
+          markCorrect();
+        } else {
+          markIncorrect();
+        }
+        renderUi();
+      }
+
+      function toggleMotion() {
+        if (state.running) {
+          state.pausedAtSeconds = currentTimeSeconds();
+          state.running = false;
+        } else {
+          state.animationStartMs = performance.now() - state.pausedAtSeconds * 1000;
+          state.running = true;
+        }
+        renderUi();
+      }
+
+      function isLocked(key) {
+        return currentStep().locks.includes(key);
+      }
+
+      function renderControls() {
+        elements.controlGrid.innerHTML = "";
+        for (const slider of SLIDERS) {
+          const card = document.createElement("div");
+          card.className = `control-card${isLocked(slider.key) ? " is-locked" : ""}`;
+
+          const header = document.createElement("div");
+          header.className = "control-header";
+          header.innerHTML = `
+            <strong>${slider.label}</strong>
+            <span class="symbol">${slider.symbol}</span>
+          `;
+
+          const valueReadout = document.createElement("div");
+          valueReadout.className = "value-readout";
+          valueReadout.textContent = `${slider.symbol} = ${formatValue(
+            state.params[slider.key],
+            slider.unit,
+            slider.digits
+          )}`;
+
+          const range = document.createElement("input");
+          range.type = "range";
+          range.min = slider.min;
+          range.max = slider.max;
+          range.step = slider.step;
+          range.value = state.params[slider.key];
+          range.disabled = isLocked(slider.key);
+          range.id = `slider-${slider.key}`;
+          range.setAttribute("aria-label", slider.label);
+          range.addEventListener("input", (event) => {
+            state.params[slider.key] = Number(event.target.value);
+            if (slider.key === "phase") {
+              state.params[slider.key] = normalizePhase(state.params[slider.key]);
+            }
+            renderUi();
+          });
+
+          const rangeRow = document.createElement("div");
+          rangeRow.className = "range-row";
+          rangeRow.innerHTML = `
+            <span>${formatValue(slider.min, slider.unit, slider.digits)}</span>
+            <span>${formatValue(slider.max, slider.unit, slider.digits)}</span>
+          `;
+
+          card.append(header, valueReadout, range, rangeRow);
+          elements.controlGrid.append(card);
+        }
+      }
+
+      function renderDerivedValues() {
+        const values = derivedValues(state.params);
+        const cards = [
+          {
+            label: "Jaksonaika T",
+            value: formatValue(values.period, "s", 2),
+          },
+          {
+            label: "Aaltoluku k",
+            value: formatValue(values.waveNumber, "rad/m", 2),
+          },
+          {
+            label: "Kulmataajuus ω",
+            value: formatValue(values.angularFrequency, "rad/s", 2),
+          },
+          {
+            label: "Etenemisnopeus v",
+            value: formatValue(values.speed, "m/s", 2),
+          },
+        ];
+
+        elements.derivedStrip.innerHTML = cards
+          .map(
+            (card) => `
+              <div class="derived-card">
+                <span>${card.label}</span>
+                <strong>${card.value}</strong>
+              </div>
+            `
+          )
+          .join("");
+      }
+
+      function renderAnswers() {
+        const step = currentStep();
+        elements.lessonAnswers.innerHTML = "";
+        if (step.answerType !== "choice") {
+          return;
+        }
+
+        step.choices.forEach((choice, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `choice-button${state.selectedChoice === index ? " is-selected" : ""}`;
+          button.textContent = choice;
+          button.addEventListener("click", () => {
+            state.selectedChoice = index;
+            renderUi();
+          });
+          elements.lessonAnswers.append(button);
+        });
+      }
+
+      function renderSummary() {
+        const items = [
+          {
+            label: "Amplitudi A",
+            value: formatValue(state.params.amplitude, "m", 1),
+          },
+          {
+            label: "Aallonpituus λ",
+            value: formatValue(state.params.wavelength, "m", 1),
+          },
+          {
+            label: "Taajuus f",
+            value: formatValue(state.params.frequency, "Hz", 1),
+          },
+          {
+            label: "Jaksonaika T",
+            value: formatValue(derivedValues(state.params).period, "s", 2),
+          },
+          {
+            label: "Vaihe φ",
+            value: formatValue(state.params.phase, "rad", 2),
+          },
+        ];
+
+        elements.summaryGrid.innerHTML = items
+          .map(
+            (item) => `
+              <div class="summary-item">
+                <span>${item.label}</span>
+                <strong>${item.value}</strong>
+              </div>
+            `
+          )
+          .join("");
+      }
+
+      function renderUi() {
+        const step = currentStep();
+        elements.progress.textContent = `Vaihe ${state.stepIndex + 1} / 5`;
+        elements.lessonStepLabel.textContent = `Vaihe ${state.stepIndex + 1} / 5`;
+        elements.viewIndicator.textContent =
+          step.view === "time" ? "Näkymä: aika t (s)" : "Näkymä: paikka x (m)";
+        elements.statusIndicator.textContent = state.running ? "Animaatio käynnissä" : "Animaatio pysäytetty";
+        elements.toggleMotion.textContent = state.running ? "Pysäytä" : "Jatka";
+        elements.lessonTitle.textContent = step.title;
+        elements.lessonGoal.textContent = `Tavoite: ${step.goal}`;
+        elements.lessonDescription.textContent = step.description;
+        elements.lessonTask.textContent = step.task;
+        elements.feedback.textContent = state.feedback;
+        elements.feedback.dataset.state = state.feedbackState;
+        elements.canvasTitle.textContent =
+          step.view === "time" ? "Poikkeama ajan funktiona" : "Poikkeama paikan funktiona";
+        elements.canvasCopy.textContent =
+          state.stepIndex === 0
+            ? "Aallonharja ja aallonpohja on merkitty näkyviin ensimmäisen vaiheen ajaksi."
+            : step.view === "time"
+              ? "Vaakasuunnassa on aika ja pystysuunnassa poikkeama y (m)."
+              : "Tasapainoasema näkyy vaakasuorana vertailuviivana.";
+
+        renderControls();
+        renderDerivedValues();
+        renderAnswers();
+
+        elements.checkButton.disabled =
+          step.answerType === "choice" && state.selectedChoice === null && !state.completedSteps[state.stepIndex];
+        elements.checkButton.hidden = state.finished;
+
+        elements.nextButton.hidden = !state.completedSteps[state.stepIndex] || state.stepIndex === STEPS.length - 1;
+        elements.summaryCard.classList.toggle("is-visible", state.finished);
+        if (state.finished) {
+          renderSummary();
+        }
+      }
+
+      function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = elements.canvas.getBoundingClientRect();
+        elements.canvas.width = Math.round(rect.width * dpr);
+        elements.canvas.height = Math.round(rect.height * dpr);
+      }
+
+      function drawAxes(ctx, plot, yMin, yMax, xMin, xMax, xLabel) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(23, 48, 71, 0.12)";
+        ctx.fillStyle = "rgba(88, 109, 128, 0.92)";
+        ctx.lineWidth = 1;
+        ctx.font = "13px Georgia";
+
+        const xTicks = 8;
+        const yTicks = 4;
+        for (let index = 0; index <= xTicks; index += 1) {
+          const t = index / xTicks;
+          const x = plot.left + plot.width * t;
+          ctx.beginPath();
+          ctx.moveTo(x, plot.top);
+          ctx.lineTo(x, plot.top + plot.height);
+          ctx.stroke();
+
+          const value = xMin + (xMax - xMin) * t;
+          ctx.fillText(formatNumber(value, 1), x - 10, plot.top + plot.height + 22);
+        }
+
+        for (let index = 0; index <= yTicks; index += 1) {
+          const t = index / yTicks;
+          const y = plot.top + plot.height * t;
+          ctx.beginPath();
+          ctx.moveTo(plot.left, y);
+          ctx.lineTo(plot.left + plot.width, y);
+          ctx.stroke();
+
+          const value = yMax - (yMax - yMin) * t;
+          ctx.fillText(formatNumber(value, 1), plot.left - 42, y + 4);
+        }
+
+        const equilibriumY = mapY(0, yMin, yMax, plot);
+        ctx.strokeStyle = "rgba(14, 130, 150, 0.4)";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(plot.left, equilibriumY);
+        ctx.lineTo(plot.left + plot.width, equilibriumY);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(23, 48, 71, 0.95)";
+        const xLabelWidth = ctx.measureText(xLabel).width;
+        ctx.fillText(xLabel, plot.left + plot.width - xLabelWidth - 4, plot.top - 6);
+
+        ctx.save();
+        ctx.translate(18, plot.top + plot.height / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillText("poikkeama y (m)", 0, 0);
+        ctx.restore();
+        ctx.restore();
+      }
+
+      function mapX(value, min, max, plot) {
+        return plot.left + ((value - min) / (max - min)) * plot.width;
+      }
+
+      function mapY(value, min, max, plot) {
+        return plot.top + ((max - value) / (max - min)) * plot.height;
+      }
+
+      function drawWavePath(ctx, plot, xMin, xMax, yMin, yMax, sampler, style) {
+        ctx.save();
+        ctx.beginPath();
+        for (let px = 0; px <= plot.width; px += 1) {
+          const xValue = xMin + (px / plot.width) * (xMax - xMin);
+          const yValue = sampler(xValue);
+          const canvasX = plot.left + px;
+          const canvasY = mapY(yValue, yMin, yMax, plot);
+          if (px === 0) {
+            ctx.moveTo(canvasX, canvasY);
+          } else {
+            ctx.lineTo(canvasX, canvasY);
+          }
+        }
+        ctx.lineWidth = style.lineWidth;
+        ctx.strokeStyle = style.strokeStyle;
+        if (style.dash) {
+          ctx.setLineDash(style.dash);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawMarkers(ctx, plot, nowSeconds, params, values) {
+        if (state.stepIndex !== 0 || currentStep().view !== "space") {
+          return;
+        }
+
+        const k = values.waveNumber;
+        const candidates = [
+          { phase: Math.PI / 2, label: "aallonharja", color: "#d55d3f" },
+          { phase: (3 * Math.PI) / 2, label: "aallonpohja", color: "#0e8296" },
+        ];
+
+        for (const candidate of candidates) {
+          for (let n = -3; n < 10; n += 1) {
+            const xValue = (values.angularFrequency * nowSeconds - params.phase + candidate.phase + 2 * Math.PI * n) / k;
+            if (xValue >= 0 && xValue <= 8) {
+              const yValue = params.amplitude * Math.sin(k * xValue - values.angularFrequency * nowSeconds + params.phase);
+              const x = mapX(xValue, 0, 8, plot);
+              const y = mapY(yValue, -2.2, 2.2, plot);
+
+              ctx.save();
+              ctx.fillStyle = candidate.color;
+              ctx.beginPath();
+              ctx.arc(x, y, 5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.font = "14px Georgia";
+              ctx.fillText(candidate.label, x + 8, y - 10);
+              ctx.restore();
+              break;
+            }
+          }
+        }
+      }
+
+      function drawTimeTracker(ctx, plot, params, values, seconds, xMax) {
+        const trackerTime = seconds % xMax;
+        const yValue = params.amplitude * Math.sin(-values.angularFrequency * trackerTime + params.phase);
+        const x = mapX(trackerTime, 0, xMax, plot);
+        const y = mapY(yValue, -2.2, 2.2, plot);
+
+        ctx.save();
+        ctx.strokeStyle = "rgba(213, 93, 63, 0.24)";
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(x, plot.top);
+        ctx.lineTo(x, plot.top + plot.height);
+        ctx.stroke();
+
+        ctx.fillStyle = "#d55d3f";
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawCanvas(nowMs) {
+        const ctx = elements.canvas.getContext("2d");
+        const dpr = window.devicePixelRatio || 1;
+        const width = elements.canvas.width / dpr;
+        const height = elements.canvas.height / dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+
+        const compact = width < 420;
+        const plot = {
+          left: compact ? 46 : 58,
+          top: 20,
+          width: Math.max(120, width - (compact ? 62 : 86)),
+          height: Math.max(140, height - (compact ? 66 : 58)),
+        };
+        const yMin = -2.2;
+        const yMax = 2.2;
+        const params = state.params;
+        const values = derivedValues(params);
+        const step = currentStep();
+        const seconds = currentTimeSeconds(nowMs);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+        ctx.fillRect(0, 0, width, height);
+
+        if (step.view === "time") {
+          const xMax = 3;
+          drawAxes(ctx, plot, yMin, yMax, 0, xMax, "aika t (s)");
+          drawWavePath(
+            ctx,
+            plot,
+            0,
+            xMax,
+            yMin,
+            yMax,
+            (timeValue) => params.amplitude * Math.sin(-values.angularFrequency * timeValue + params.phase),
+            { lineWidth: 3, strokeStyle: "#d55d3f" }
+          );
+          drawTimeTracker(ctx, plot, params, values, seconds, xMax);
+        } else {
+          const xMax = 8;
+          drawAxes(ctx, plot, yMin, yMax, 0, xMax, "paikka x (m)");
+          if (state.stepIndex === 4) {
+            drawWavePath(
+              ctx,
+              plot,
+              0,
+              xMax,
+              yMin,
+              yMax,
+              (xValue) => params.amplitude * Math.sin(values.waveNumber * xValue - values.angularFrequency * seconds),
+              {
+                lineWidth: 2,
+                strokeStyle: "rgba(14, 130, 150, 0.55)",
+                dash: [8, 8],
+              }
+            );
+          }
+          drawWavePath(
+            ctx,
+            plot,
+            0,
+            xMax,
+            yMin,
+            yMax,
+            (xValue) =>
+              params.amplitude *
+              Math.sin(values.waveNumber * xValue - values.angularFrequency * seconds + params.phase),
+            { lineWidth: 3.2, strokeStyle: "#d55d3f" }
+          );
+          drawMarkers(ctx, plot, seconds, params, values);
+        }
+      }
+
+      function animate(nowMs) {
+        drawCanvas(nowMs);
+        requestAnimationFrame(animate);
+      }
+
+      elements.checkButton.addEventListener("click", checkCurrentStep);
+      elements.nextButton.addEventListener("click", advanceStep);
+      elements.toggleMotion.addEventListener("click", toggleMotion);
+      elements.resetButton.addEventListener("click", resetApp);
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        drawCanvas(performance.now());
+      });
+
+      resizeCanvas();
+      renderUi();
+      requestAnimationFrame(animate);
+    </script>
+  </body>
+</html>
