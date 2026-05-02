@@ -1050,60 +1050,34 @@
           .join("");
       }
 
-      function renderAnswers() {
-        const step = currentStep();
-        elements.lessonAnswers.innerHTML = "";
-        if (step.answerType !== "choice") {
-          return;
-        }
-
-        step.choices.forEach((choice, index) => {
+      function renderTopicNav() {
+        elements.topicButtons.innerHTML = "";
+        TOPICS.forEach(topic => {
           const button = document.createElement("button");
-          button.type = "button";
-          button.className = `choice-button${state.selectedChoice === index ? " is-selected" : ""}`;
-          button.textContent = choice;
+          button.className = `topic-button${state.currentTopicId === topic.id ? " active" : ""}`;
+          button.textContent = topic.title;
           button.addEventListener("click", () => {
-            state.selectedChoice = index;
+            state.currentTopicId = topic.id;
+            state.params = { ...currentTopic().simulator.defaultParams };
+            state.feedback = "";
+            state.feedbackState = "";
+            state.attempts = 0;
             renderUi();
           });
-          elements.lessonAnswers.append(button);
+          elements.topicButtons.append(button);
         });
       }
 
-      function renderSummary() {
-        const items = [
-          {
-            label: "Amplitudi A",
-            value: formatValue(state.params.amplitude, "m", 1),
-          },
-          {
-            label: "Aallonpituus λ",
-            value: formatValue(state.params.wavelength, "m", 1),
-          },
-          {
-            label: "Taajuus f",
-            value: formatValue(state.params.frequency, "Hz", 1),
-          },
-          {
-            label: "Jaksonaika T",
-            value: formatValue(derivedValues(state.params).period, "s", 2),
-          },
-          {
-            label: "Vaihe φ",
-            value: formatValue(state.params.phase, "rad", 2),
-          },
-        ];
-
-        elements.summaryGrid.innerHTML = items
-          .map(
-            (item) => `
-              <div class="summary-item">
-                <span>${item.label}</span>
-                <strong>${item.value}</strong>
-              </div>
-            `
-          )
-          .join("");
+      function renderTopicIntro() {
+        const topic = currentTopic();
+        elements.topicTitle.textContent = topic.title;
+        elements.topicIntro.textContent = topic.intro;
+        elements.conceptsGrid.innerHTML = topic.concepts.map(c => `
+          <div class="concept-card">
+            <h3>${c.title}</h3>
+            <p>${c.text}</p>
+          </div>
+        `).join("");
       }
 
       function renderUi() {
@@ -1392,7 +1366,6 @@
       }
 
       elements.checkButton.addEventListener("click", checkCurrentTask);
-      elements.nextButton.addEventListener("click", advanceStep);
       elements.toggleMotion.addEventListener("click", toggleMotion);
       elements.resetButton.addEventListener("click", resetApp);
       window.addEventListener("resize", () => {
