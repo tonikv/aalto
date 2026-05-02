@@ -63,7 +63,10 @@ function renderNumeric(ex, root) {
 }
 
 function renderPredict(ex, root, state) {
-  root.innerHTML = `<div class="lesson-task"><p>${ex.predictPrompt}</p></div>`;
+  const taskEl = document.createElement("div");
+  taskEl.className = "lesson-task";
+  taskEl.innerHTML = `<p>${ex.predictPrompt}</p>`;
+  root.appendChild(taskEl);
   const choiceContainer = document.createElement("div");
   choiceContainer.className = "answers";
   root.appendChild(choiceContainer);
@@ -160,7 +163,7 @@ export function renderLesson(titleEl, contentRoot, progressEl) {
   if (state.checkResult !== true) {
     const checkBtn = document.createElement("button");
     checkBtn.className = "primary-button";
-    checkBtn.textContent = "Tarkista";
+    checkBtn.textContent = ex.type === "predict" && !state.predictRevealed ? "Tarkista ennuste" : "Tarkista";
     checkBtn.addEventListener("click", () => checkAnswer(ex));
     actionsEl.appendChild(checkBtn);
   } else {
