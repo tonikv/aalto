@@ -1,0 +1,200 @@
+.lesson-panel {
+  padding: 22px;
+}
+
+.lesson-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.lesson-copy {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.lesson-task {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(213, 93, 63, 0.08);
+  border: 1px solid rgba(213, 93, 63, 0.16);
+}
+
+.lesson-task strong,
+.lesson-task p {
+  margin: 0;
+}
+
+.lesson-task p {
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.answers {
+  display: grid;
+  gap: 10px;
+}
+
+.choice-button {
+  text-align: left;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(23, 48, 71, 0.12);
+  color: var(--text);
+}
+
+.choice-button.is-selected {
+  background: rgba(14, 130, 150, 0.12);
+  border-color: rgba(14, 130, 150, 0.38);
+}
+
+.choice-button.is-correct {
+  background: rgba(29, 127, 79, 0.12);
+  border-color: rgba(29, 127, 79, 0.38);
+}
+
+.choice-button.is-wrong {
+  background: rgba(163, 77, 53, 0.12);
+  border-color: rgba(163, 77, 53, 0.38);
+}
+
+.numeric-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.numeric-input-row label {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.numeric-input {
+  border: 1px solid rgba(23, 48, 71, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text);
+  width: 120px;
+}
+
+.numeric-unit {
+  color: var(--muted);
+}
+
+.predict-verify-box {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(14, 130, 150, 0.06);
+  border: 1px solid rgba(14, 130, 150, 0.18);
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.5;
+}
+
+.investigate-instructions {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(14, 130, 150, 0.06);
+  border: 1px solid rgba(14, 130, 150, 0.18);
+  line-height: 1.6;
+}
+
+.hint-box,
+.solution-box {
+  padding: 14px 16px;
+  border-radius: 16px;
+  line-height: 1.55;
+}
+
+.hint-box {
+  background: rgba(213, 93, 63, 0.06);
+  border: 1px solid rgba(213, 93, 63, 0.2);
+}
+
+.solution-box {
+  background: rgba(29, 127, 79, 0.06);
+  border: 1px solid rgba(29, 127, 79, 0.2);
+}
+
+.feedback {
+  min-height: 28px;
+  font-size: 1rem;
+}
+
+.feedback[data-state="success"] {
+  color: var(--success);
+}
+
+.feedback[data-state="error"] {
+  color: var(--danger);
+}
+
+.lesson-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.difficulty-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(23, 48, 71, 0.07);
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.progress-text {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.summary-card {
+  display: none;
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(14, 130, 150, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 242, 229, 0.96));
+  border: 1px solid rgba(23, 48, 71, 0.1);
+}
+
+.summary-card.is-visible {
+  display: block;
+}
+
+.summary-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-item {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(23, 48, 71, 0.08);
+}
+
+.summary-item span {
+  display: block;
+  color: var(--muted);
+}
+
+.summary-item strong {
+  display: block;
+  margin-top: 6px;
+}

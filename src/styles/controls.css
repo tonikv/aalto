@@ -1,0 +1,87 @@
+.controls-panel {
+  padding: 22px;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.control-card {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--panel-strong);
+  border: 1px solid rgba(23, 48, 71, 0.08);
+}
+
+.control-card.is-locked {
+  background: rgba(127, 145, 160, 0.12);
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.control-header strong {
+  font-size: 1.02rem;
+}
+
+.symbol {
+  color: var(--highlight);
+  font-style: italic;
+}
+
+.value-readout {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-top: 14px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+input[type="range"]:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.range-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.derived-strip {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.derived-card {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(14, 130, 150, 0.08), rgba(255, 255, 255, 0.86));
+  border: 1px solid rgba(14, 130, 150, 0.16);
+}
+
+.derived-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.derived-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.08rem;
+}
