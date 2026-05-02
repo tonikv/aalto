@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aaltoliike-oppimispolku</title>
+    <title>Fysiikan ilmiölaboratorio</title>
     <style>
       :root {
         --bg: #f5efe1;
@@ -142,6 +142,75 @@
         gap: 10px;
         flex-wrap: wrap;
         justify-content: flex-end;
+      }
+
+      .topic-nav {
+        padding: 16px 24px;
+      }
+
+      .topic-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .topic-button {
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(23, 48, 71, 0.08);
+        color: var(--text);
+        font: inherit;
+        cursor: pointer;
+        transition: background 140ms ease;
+      }
+
+      .topic-button:hover {
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .topic-button.active {
+        background: var(--accent);
+        color: #fffaf4;
+      }
+
+      .topic-intro-panel {
+        padding: 22px 24px;
+      }
+
+      .topic-intro-panel h2 {
+        margin: 0 0 12px;
+        font-size: 1.5rem;
+      }
+
+      .topic-intro-panel p {
+        margin: 0 0 20px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .concepts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+
+      .concept-card {
+        padding: 16px;
+        border-radius: 20px;
+        background: var(--panel-strong);
+        border: 1px solid rgba(23, 48, 71, 0.08);
+      }
+
+      .concept-card h3 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+      }
+
+      .concept-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.4;
       }
 
       button {
@@ -490,21 +559,28 @@
         <header class="panel hero">
           <div>
             <p class="eyebrow">FY3 / FY7</p>
-            <h1>Aaltoliike-oppimispolku</h1>
+            <h1>Fysiikan ilmiölaboratorio</h1>
             <p>
-              Tutki, miten amplitudi, aallonpituus, taajuus, jaksonaika ja vaihe muokkaavat
-              siniaaltoa. Säädä arvoja ja tarkista oivalluksesi vaihe vaiheelta.
+              Tutki aaltoja, ääntä, säteilyä, valoa, peilejä ja linssejä visuaalisesti.
             </p>
           </div>
           <div class="hero-tools">
-            <div class="progress-pill" id="progress-indicator">Vaihe 1 / 5</div>
-            <div class="mode-pill" id="view-indicator">Näkymä: paikka x (m)</div>
             <div class="hero-actions">
               <button class="secondary-button" id="toggle-motion">Pysäytä</button>
               <button class="secondary-button" id="reset-app">Palauta alkuasetukset</button>
             </div>
           </div>
         </header>
+
+        <nav class="panel topic-nav">
+          <div class="topic-buttons" id="topic-buttons"></div>
+        </nav>
+
+        <section class="panel topic-intro-panel">
+          <h2 id="topic-title"></h2>
+          <p id="topic-intro"></p>
+          <div class="concepts-grid" id="concepts-grid"></div>
+        </section>
 
         <section class="panel visual-panel">
           <div class="visual-topline">
@@ -514,7 +590,6 @@
                 Aallonharja ja aallonpohja auttavat hahmottamaan poikkeamaa tasapainoasemasta.
               </p>
             </div>
-            <div class="mode-pill" id="status-indicator">Animaatio käynnissä</div>
           </div>
           <div class="canvas-shell">
             <canvas id="wave-canvas" aria-describedby="canvas-description"></canvas>
@@ -534,17 +609,11 @@
         <section class="panel lesson-panel">
           <div class="lesson-topline">
             <div>
-              <p class="eyebrow" id="lesson-step-label">Vaihe 1 / 5</p>
               <h2 id="lesson-title">Tutustuminen</h2>
             </div>
-            <div class="mode-pill" id="lesson-goal">Tavoite: simulaation hahmottaminen</div>
           </div>
           <div class="lesson-copy">
             <p id="lesson-description"></p>
-            <div class="lesson-task">
-              <strong>Tehtävä</strong>
-              <p id="lesson-task"></p>
-            </div>
             <div class="answers" id="lesson-answers"></div>
             <div class="feedback" id="feedback" data-state=""></div>
             <div class="lesson-actions">
@@ -565,163 +634,253 @@
     </main>
 
     <script>
-      const DEFAULT_PARAMS = {
-        amplitude: 1.0,
-        wavelength: 2.0,
-        frequency: 1.0,
-        phase: 0.0,
-      };
-
-      const SLIDERS = [
+      const TOPICS = [
         {
-          key: "amplitude",
-          label: "Amplitudi",
-          symbol: "A",
-          min: 0.1,
-          max: 2.0,
-          step: 0.1,
-          unit: "m",
-          digits: 1,
-        },
-        {
-          key: "wavelength",
-          label: "Aallonpituus",
-          symbol: "λ",
-          min: 0.5,
-          max: 5.0,
-          step: 0.1,
-          unit: "m",
-          digits: 1,
-        },
-        {
-          key: "frequency",
-          label: "Taajuus",
-          symbol: "f",
-          min: 0.1,
-          max: 5.0,
-          step: 0.1,
-          unit: "Hz",
-          digits: 1,
-        },
-        {
-          key: "phase",
-          label: "Vaihe",
-          symbol: "φ",
-          min: 0,
-          max: Math.PI * 2,
-          step: Math.PI / 8,
-          unit: "rad",
-          digits: 2,
-        },
-      ];
-
-      const STEPS = [
-        {
-          title: "Tutustuminen",
-          goal: "simulaation hahmottaminen",
-          description:
-            "Aaltoliike kuvaa etenevää värähtelyä. Tässä näkymässä vaakasuunnassa on paikka ja pystysuunnassa poikkeama tasapainoasemasta.",
-          task: "Liikuta säätimiä vapaasti. Mitä tapahtuu, kun muutat amplitudia?",
-          view: "space",
-          locks: [],
-          hint: "Amplitudi kertoo poikkeaman suurimman arvon tasapainoasemasta.",
-          answerType: "choice",
-          choices: [
-            "Amplitudi määrää, kuinka korkealle ja matalalle aalto ulottuu.",
-            "Amplitudi määrää, kuinka pitkä yksi aalto on.",
-            "Amplitudi määrää, kuinka monta värähdystä tapahtuu sekunnissa.",
+          id: "waves",
+          title: "Värähdys- ja aaltoliike",
+          intro: "Aaltoliike kuvaa etenevää värähtelyä. Tutki miten amplitudi, aallonpituus ja taajuus vaikuttavat aaltoon.",
+          concepts: [
+            { title: "Värähdysliike", text: "Esine liikkuu tasapainoasemansa ympärillä toistuvasti." },
+            { title: "Aaltoliike", text: "Energia etenee värähdellen ilman että aine itse liikkuu." },
+            { title: "Amplitudi", text: "Värähtelyn suurin poikkeama tasapainoasemasta." },
+            { title: "Aallonpituus", text: "Etäisyyden kahden peräkkäisen aallonharjan välillä." }
           ],
-          check: (state) => state.selectedChoice === 0,
+          simulator: {
+            type: "wave",
+            controls: [
+              {
+                key: "amplitude",
+                label: "Amplitudi",
+                symbol: "A",
+                min: 0.1,
+                max: 2.0,
+                step: 0.1,
+                unit: "m",
+                digits: 1,
+              },
+              {
+                key: "wavelength",
+                label: "Aallonpituus",
+                symbol: "λ",
+                min: 0.5,
+                max: 5.0,
+                step: 0.1,
+                unit: "m",
+                digits: 1,
+              },
+              {
+                key: "frequency",
+                label: "Taajuus",
+                symbol: "f",
+                min: 0.1,
+                max: 5.0,
+                step: 0.1,
+                unit: "Hz",
+                digits: 1,
+              },
+              {
+                key: "phase",
+                label: "Vaihe",
+                symbol: "φ",
+                min: 0,
+                max: Math.PI * 2,
+                step: Math.PI / 8,
+                unit: "rad",
+                digits: 2,
+              },
+            ],
+            defaultParams: {
+              amplitude: 1.0,
+              wavelength: 2.0,
+              frequency: 1.0,
+              phase: 0.0,
+            },
+          },
+          task: {
+            description: "Säädä amplitudi 1,5 m:ksi ja aallonpituus 3 m:ksi. Mitä tapahtuu?",
+            check: (params) => Math.abs(params.amplitude - 1.5) < 0.1 && Math.abs(params.wavelength - 3) < 0.1,
+            hint: "Käytä liukusäätimiä amplitudille ja aallonpituudelle.",
+          },
         },
         {
-          title: "Amplitudi",
-          goal: "pystysuunnan venymän erottaminen",
-          description:
-            "Kun vain amplitudi muuttuu, aallon muoto säilyy mutta poikkeaman suurin arvo kasvaa tai pienenee.",
-          task: "Aseta amplitudi siten, että aallon huippu on tasolla 1,5 m.",
-          view: "space",
-          locks: ["wavelength", "frequency", "phase"],
-          hint: "Huipun korkeus tasapainoasemasta on sama kuin amplitudi.",
-          answerType: "slider",
-          check: (state) => Math.abs(state.params.amplitude - 1.5) < 0.05,
+          id: "sound",
+          title: "Ääni",
+          intro: "Ääni on paineaalto, joka syntyy värähtelystä ja kulkee aineessa.",
+          concepts: [
+            { title: "Ääniaalto", text: "Painevaihtelut, jotka kuulemme äänenä." },
+            { title: "Taajuus", text: "Äänen korkeus riippuu värähtelyjen määrästä sekunnissa." },
+          ],
+          simulator: {
+            type: "sound",
+            controls: [
+              {
+                key: "frequency",
+                label: "Taajuus",
+                symbol: "f",
+                min: 20,
+                max: 20000,
+                step: 10,
+                unit: "Hz",
+                digits: 0,
+              },
+              {
+                key: "amplitude",
+                label: "Amplitudi",
+                symbol: "A",
+                min: 0.1,
+                max: 1.0,
+                step: 0.1,
+                unit: "",
+                digits: 1,
+              },
+            ],
+            defaultParams: {
+              frequency: 440,
+              amplitude: 0.5,
+            },
+          },
+          task: {
+            description: "Säädä taajuus 1000 Hz:ksi. Kuinka äänen korkeus muuttuu?",
+            check: (params) => Math.abs(params.frequency - 1000) < 50,
+            hint: "Liikuta taajuuden liukusäädintä.",
+          },
         },
         {
-          title: "Aallonpituus ja taajuus",
-          goal: "etenemisnopeuden hahmottaminen",
-          description:
-            "Aallonpituus ja taajuus ovat eri asioita, mutta yhdessä ne määräävät etenemisnopeuden yhtälöllä v = f · λ.",
-          task: "Etsi yhdistelmä, jossa aallon etenemisnopeus on noin 6 m/s.",
-          view: "space",
-          locks: ["amplitude", "phase"],
-          hint: "Käytä yhtälöä v = f · λ.",
-          answerType: "slider",
-          check: (state) => Math.abs(derivedValues(state.params).speed - 6) < 0.3,
+          id: "radiation",
+          title: "Säteily",
+          intro: "Säteily on energiaa, joka etenee aalloina tai hiukkasina.",
+          concepts: [
+            { title: "Sähkömagneettinen säteily", text: "Valo ja muut säteet, jotka koostuvat sähkö- ja magneettikentistä." },
+            { title: "Aallonpituus", text: "Määrää säteilyn värin tai tyypin." },
+          ],
+          simulator: {
+            type: "radiation",
+            controls: [
+              {
+                key: "wavelength",
+                label: "Aallonpituus",
+                symbol: "λ",
+                min: 400,
+                max: 700,
+                step: 10,
+                unit: "nm",
+                digits: 0,
+              },
+            ],
+            defaultParams: {
+              wavelength: 550,
+            },
+          },
+          task: {
+            description: "Säädä aallonpituus 650 nm:ksi. Mikä väri näkyy?",
+            check: (params) => Math.abs(params.wavelength - 650) < 10,
+            hint: "Punainen väri on noin 650 nm.",
+          },
         },
         {
-          title: "Jaksonaika",
-          goal: "taajuuden ja jaksonajan yhteys",
-          description:
-            "Nyt kuvaaja esittää poikkeamaa ajan funktiona. Jaksonaika kertoo, kuinka kauan yksi täysi värähdys kestää.",
-          task: "Säädä taajuus niin, että jaksonaika on 0,5 s.",
-          view: "time",
-          locks: ["amplitude", "wavelength", "phase"],
-          hint: "Muista yhteys T = 1/f.",
-          answerType: "slider",
-          check: (state) => Math.abs(derivedValues(state.params).period - 0.5) < 0.05,
+          id: "light",
+          title: "Valo",
+          intro: "Valo on näkyvä sähkömagneettinen säteily.",
+          concepts: [
+            { title: "Heijastuminen", text: "Valo kimpoaa pinnasta samaan kulmaan kuin tuli." },
+            { title: "Taitekerroin", text: "Määrää miten valo taittuu eri aineissa." },
+          ],
+          simulator: {
+            type: "light",
+            controls: [
+              {
+                key: "angle",
+                label: "Tulokulma",
+                symbol: "θ",
+                min: 0,
+                max: 90,
+                step: 5,
+                unit: "°",
+                digits: 0,
+              },
+            ],
+            defaultParams: {
+              angle: 30,
+            },
+          },
+          task: {
+            description: "Säädä tulokulma 45°:ksi. Mitä tapahtuu heijastuneelle valolle?",
+            check: (params) => Math.abs(params.angle - 45) < 5,
+            hint: "Heijastuskulma on sama kuin tulokulma.",
+          },
         },
         {
-          title: "Vaihe",
-          goal: "vaihe-eron näkeminen siirtymänä",
-          description:
-            "Vertailuaalto pysyy paikallaan arvossa φ = 0. Säädä omaa aaltoasi niin, että se on vastakkaisvaiheessa vertailuaaltoon nähden.",
-          task: "Siirrä aaltoa siten, että se on vastakkaisvaiheessa vertailuaaltoon nähden.",
-          view: "space",
-          locks: ["amplitude", "wavelength", "frequency"],
-          hint: "Vastakkaisvaihe tarkoittaa puolen jakson siirtymää eli φ ≈ π rad.",
-          answerType: "slider",
-          check: (state) => Math.abs(normalizePhase(state.params.phase) - Math.PI) <= Math.PI / 8,
+          id: "mirrors",
+          title: "Peilit ja linssit",
+          intro: "Peilit ja linssit ohjaavat valoa ja muodostavat kuvia.",
+          concepts: [
+            { title: "Tasopeili", text: "Kuva on samankokoinen ja samansuuntaisesti." },
+            { title: "Koveralinssi", text: "Kerää valoa ja voi muodostaa todellisen kuvan." },
+          ],
+          simulator: {
+            type: "mirror",
+            controls: [
+              {
+                key: "objectDistance",
+                label: "Esineen etäisyys",
+                symbol: "d",
+                min: 5,
+                max: 20,
+                step: 1,
+                unit: "cm",
+                digits: 0,
+              },
+            ],
+            defaultParams: {
+              objectDistance: 10,
+            },
+          },
+          task: {
+            description: "Säädä esineen etäisyys 15 cm:ksi. Missä kuva muodostuu?",
+            check: (params) => Math.abs(params.objectDistance - 15) < 1,
+            hint: "Koverapeilissä kuva on esineen takana.",
+          },
         },
       ];
 
       const state = {
-        params: { ...DEFAULT_PARAMS },
-        stepIndex: 0,
-        selectedChoice: null,
+        currentTopicId: "waves",
+        params: { ...TOPICS[0].simulator.defaultParams },
         feedback: "",
         feedbackState: "",
-        attempts: STEPS.map(() => 0),
-        completedSteps: STEPS.map(() => false),
+        attempts: 0,
         running: true,
         pausedAtSeconds: 0,
         animationStartMs: performance.now(),
-        finished: false,
       };
 
       const elements = {
-        progress: document.getElementById("progress-indicator"),
-        viewIndicator: document.getElementById("view-indicator"),
-        statusIndicator: document.getElementById("status-indicator"),
+        topicButtons: document.getElementById("topic-buttons"),
+        topicTitle: document.getElementById("topic-title"),
+        topicIntro: document.getElementById("topic-intro"),
+        conceptsGrid: document.getElementById("concepts-grid"),
         canvasTitle: document.getElementById("canvas-title"),
         canvasCopy: document.getElementById("canvas-copy"),
         controlGrid: document.getElementById("control-grid"),
         derivedStrip: document.getElementById("derived-strip"),
-        lessonStepLabel: document.getElementById("lesson-step-label"),
         lessonTitle: document.getElementById("lesson-title"),
         lessonGoal: document.getElementById("lesson-goal"),
         lessonDescription: document.getElementById("lesson-description"),
         lessonTask: document.getElementById("lesson-task"),
-        lessonAnswers: document.getElementById("lesson-answers"),
         feedback: document.getElementById("feedback"),
         checkButton: document.getElementById("check-answer"),
         nextButton: document.getElementById("next-step"),
-        summaryCard: document.getElementById("summary-card"),
-        summaryGrid: document.getElementById("summary-grid"),
         toggleMotion: document.getElementById("toggle-motion"),
         resetButton: document.getElementById("reset-app"),
         canvas: document.getElementById("wave-canvas"),
       };
 
+      function currentTopic() {
+        return TOPICS.find(t => t.id === state.currentTopicId);
+      }
+
       function derivedValues(params) {
+        if (currentTopic().simulator.type !== "wave") return {};
         return {
           period: 1 / params.frequency,
           waveNumber: (2 * Math.PI) / params.wavelength,
@@ -750,10 +909,6 @@
         return normalized;
       }
 
-      function currentStep() {
-        return STEPS[state.stepIndex];
-      }
-
       function currentTimeSeconds(now = performance.now()) {
         if (!state.running) {
           return state.pausedAtSeconds;
@@ -761,34 +916,14 @@
         return (now - state.animationStartMs) / 1000;
       }
 
-      function applyStepDefaults() {
-        state.params = { ...DEFAULT_PARAMS };
-        state.selectedChoice = null;
-        state.feedback = "";
-        state.feedbackState = "";
-      }
-
       function resetApp() {
-        state.stepIndex = 0;
-        state.selectedChoice = null;
+        state.params = { ...currentTopic().simulator.defaultParams };
         state.feedback = "";
         state.feedbackState = "";
-        state.attempts = STEPS.map(() => 0);
-        state.completedSteps = STEPS.map(() => false);
-        state.finished = false;
-        state.params = { ...DEFAULT_PARAMS };
+        state.attempts = 0;
         state.running = true;
         state.pausedAtSeconds = 0;
         state.animationStartMs = performance.now();
-        renderUi();
-      }
-
-      function advanceStep() {
-        if (state.stepIndex >= STEPS.length - 1) {
-          return;
-        }
-        state.stepIndex += 1;
-        applyStepDefaults();
         renderUi();
       }
 
@@ -797,38 +932,18 @@
         state.feedbackState = type;
       }
 
-      function markCorrect() {
-        state.completedSteps[state.stepIndex] = true;
-        setFeedback("Oikein! Hyvää työtä.", "success");
-        if (state.stepIndex === STEPS.length - 1) {
-          state.finished = true;
-        }
-      }
-
-      function markIncorrect() {
-        state.attempts[state.stepIndex] += 1;
-        const hint = currentStep().hint;
-        if (state.attempts[state.stepIndex] >= 2) {
-          setFeedback(`Vihje: ${hint}`, "error");
+      function checkCurrentTask() {
+        const task = currentTopic().task;
+        if (task.check(state.params)) {
+          setFeedback("Oikein! Hyvää työtä.", "success");
         } else {
-          setFeedback("Ei aivan. Kokeile uudelleen.", "error");
-        }
-      }
-
-      function checkCurrentStep() {
-        if (state.finished) {
-          return;
-        }
-        const step = currentStep();
-        if (step.answerType === "choice" && state.selectedChoice === null) {
-          setFeedback("Ei aivan. Kokeile uudelleen.", "error");
-          renderUi();
-          return;
-        }
-        if (step.check(state)) {
-          markCorrect();
-        } else {
-          markIncorrect();
+          state.attempts += 1;
+          const hint = task.hint;
+          if (state.attempts >= 2) {
+            setFeedback(`Vihje: ${hint}`, "error");
+          } else {
+            setFeedback("Ei aivan. Kokeile uudelleen.", "error");
+          }
         }
         renderUi();
       }
@@ -850,9 +965,10 @@
 
       function renderControls() {
         elements.controlGrid.innerHTML = "";
-        for (const slider of SLIDERS) {
+        const controls = currentTopic().simulator.controls;
+        for (const slider of controls) {
           const card = document.createElement("div");
-          card.className = `control-card${isLocked(slider.key) ? " is-locked" : ""}`;
+          card.className = "control-card";
 
           const header = document.createElement("div");
           header.className = "control-header";
@@ -875,7 +991,6 @@
           range.max = slider.max;
           range.step = slider.step;
           range.value = state.params[slider.key];
-          range.disabled = isLocked(slider.key);
           range.id = `slider-${slider.key}`;
           range.setAttribute("aria-label", slider.label);
           range.addEventListener("input", (event) => {
@@ -899,6 +1014,10 @@
       }
 
       function renderDerivedValues() {
+        if (currentTopic().simulator.type !== "wave") {
+          elements.derivedStrip.innerHTML = "";
+          return;
+        }
         const values = derivedValues(state.params);
         const cards = [
           {
@@ -988,41 +1107,18 @@
       }
 
       function renderUi() {
-        const step = currentStep();
-        elements.progress.textContent = `Vaihe ${state.stepIndex + 1} / 5`;
-        elements.lessonStepLabel.textContent = `Vaihe ${state.stepIndex + 1} / 5`;
-        elements.viewIndicator.textContent =
-          step.view === "time" ? "Näkymä: aika t (s)" : "Näkymä: paikka x (m)";
-        elements.statusIndicator.textContent = state.running ? "Animaatio käynnissä" : "Animaatio pysäytetty";
-        elements.toggleMotion.textContent = state.running ? "Pysäytä" : "Jatka";
-        elements.lessonTitle.textContent = step.title;
-        elements.lessonGoal.textContent = `Tavoite: ${step.goal}`;
-        elements.lessonDescription.textContent = step.description;
-        elements.lessonTask.textContent = step.task;
-        elements.feedback.textContent = state.feedback;
-        elements.feedback.dataset.state = state.feedbackState;
-        elements.canvasTitle.textContent =
-          step.view === "time" ? "Poikkeama ajan funktiona" : "Poikkeama paikan funktiona";
-        elements.canvasCopy.textContent =
-          state.stepIndex === 0
-            ? "Aallonharja ja aallonpohja on merkitty näkyviin ensimmäisen vaiheen ajaksi."
-            : step.view === "time"
-              ? "Vaakasuunnassa on aika ja pystysuunnassa poikkeama y (m)."
-              : "Tasapainoasema näkyy vaakasuorana vertailuviivana.";
-
+        renderTopicNav();
+        renderTopicIntro();
+        elements.canvasTitle.textContent = currentTopic().title;
+        elements.canvasCopy.textContent = "Tutki ilmiötä muuttamalla arvoja.";
         renderControls();
         renderDerivedValues();
-        renderAnswers();
-
-        elements.checkButton.disabled =
-          step.answerType === "choice" && state.selectedChoice === null && !state.completedSteps[state.stepIndex];
-        elements.checkButton.hidden = state.finished;
-
-        elements.nextButton.hidden = !state.completedSteps[state.stepIndex] || state.stepIndex === STEPS.length - 1;
-        elements.summaryCard.classList.toggle("is-visible", state.finished);
-        if (state.finished) {
-          renderSummary();
-        }
+        elements.lessonTitle.textContent = "Tutkimustehtävä";
+        elements.lessonDescription.textContent = currentTopic().task.description;
+        elements.feedback.textContent = state.feedback;
+        elements.feedback.dataset.state = state.feedbackState;
+        elements.checkButton.disabled = false;
+        elements.nextButton.hidden = true;
       }
 
       function resizeCanvas() {
@@ -1185,49 +1281,19 @@
           width: Math.max(120, width - (compact ? 62 : 86)),
           height: Math.max(140, height - (compact ? 66 : 58)),
         };
-        const yMin = -2.2;
-        const yMax = 2.2;
         const params = state.params;
-        const values = derivedValues(params);
-        const step = currentStep();
+        const topic = currentTopic();
         const seconds = currentTimeSeconds(nowMs);
 
         ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
         ctx.fillRect(0, 0, width, height);
 
-        if (step.view === "time") {
-          const xMax = 3;
-          drawAxes(ctx, plot, yMin, yMax, 0, xMax, "aika t (s)");
-          drawWavePath(
-            ctx,
-            plot,
-            0,
-            xMax,
-            yMin,
-            yMax,
-            (timeValue) => params.amplitude * Math.sin(-values.angularFrequency * timeValue + params.phase),
-            { lineWidth: 3, strokeStyle: "#d55d3f" }
-          );
-          drawTimeTracker(ctx, plot, params, values, seconds, xMax);
-        } else {
+        if (topic.simulator.type === "wave") {
+          const yMin = -2.2;
+          const yMax = 2.2;
           const xMax = 8;
+          const values = derivedValues(params);
           drawAxes(ctx, plot, yMin, yMax, 0, xMax, "paikka x (m)");
-          if (state.stepIndex === 4) {
-            drawWavePath(
-              ctx,
-              plot,
-              0,
-              xMax,
-              yMin,
-              yMax,
-              (xValue) => params.amplitude * Math.sin(values.waveNumber * xValue - values.angularFrequency * seconds),
-              {
-                lineWidth: 2,
-                strokeStyle: "rgba(14, 130, 150, 0.55)",
-                dash: [8, 8],
-              }
-            );
-          }
           drawWavePath(
             ctx,
             plot,
@@ -1240,7 +1306,83 @@
               Math.sin(values.waveNumber * xValue - values.angularFrequency * seconds + params.phase),
             { lineWidth: 3.2, strokeStyle: "#d55d3f" }
           );
-          drawMarkers(ctx, plot, seconds, params, values);
+        } else if (topic.simulator.type === "sound") {
+          const yMin = -1;
+          const yMax = 1;
+          const xMax = 10;
+          drawAxes(ctx, plot, yMin, yMax, 0, xMax, "aika t (s)");
+          drawWavePath(
+            ctx,
+            plot,
+            0,
+            xMax,
+            yMin,
+            yMax,
+            (timeValue) => params.amplitude * Math.sin(2 * Math.PI * params.frequency * timeValue),
+            { lineWidth: 2, strokeStyle: "#0e8296" }
+          );
+        } else if (topic.simulator.type === "radiation") {
+          // Draw color bar
+          const gradient = ctx.createLinearGradient(plot.left, plot.top, plot.left + plot.width, plot.top);
+          const wavelength = params.wavelength;
+          // Simple color approximation
+          let color = "#ff0000"; // red
+          if (wavelength < 500) color = "#0000ff"; // blue
+          else if (wavelength < 600) color = "#00ff00"; // green
+          ctx.fillStyle = color;
+          ctx.fillRect(plot.left, plot.top, plot.width, plot.height);
+          ctx.fillStyle = "#000";
+          ctx.font = "20px Georgia";
+          ctx.fillText(`${wavelength} nm`, plot.left + plot.width / 2 - 30, plot.top + plot.height / 2);
+        } else if (topic.simulator.type === "light") {
+          // Draw ray diagram
+          const angle = (params.angle * Math.PI) / 180;
+          const centerX = plot.left + plot.width / 2;
+          const centerY = plot.top + plot.height / 2;
+          ctx.strokeStyle = "#d55d3f";
+          ctx.lineWidth = 2;
+          // Incident ray
+          ctx.beginPath();
+          ctx.moveTo(centerX - 50, centerY);
+          ctx.lineTo(centerX, centerY);
+          ctx.stroke();
+          // Reflected ray
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.lineTo(centerX + 50 * Math.cos(angle), centerY - 50 * Math.sin(angle));
+          ctx.stroke();
+          // Normal
+          ctx.strokeStyle = "#000";
+          ctx.setLineDash([5, 5]);
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY - 50);
+          ctx.lineTo(centerX, centerY + 50);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else if (topic.simulator.type === "mirror") {
+          // Draw mirror and rays
+          const objDist = params.objectDistance;
+          const centerX = plot.left + plot.width / 2;
+          const centerY = plot.top + plot.height / 2;
+          // Mirror
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY - 50);
+          ctx.lineTo(centerX, centerY + 50);
+          ctx.stroke();
+          // Object
+          ctx.fillStyle = "#d55d3f";
+          ctx.beginPath();
+          ctx.arc(centerX - objDist, centerY, 5, 0, Math.PI * 2);
+          ctx.fill();
+          // Image (simplified)
+          const focalLength = 10; // assume
+          const imageDist = (objDist * focalLength) / (objDist - focalLength);
+          ctx.fillStyle = "#0e8296";
+          ctx.beginPath();
+          ctx.arc(centerX - imageDist, centerY, 5, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
 
@@ -1249,7 +1391,7 @@
         requestAnimationFrame(animate);
       }
 
-      elements.checkButton.addEventListener("click", checkCurrentStep);
+      elements.checkButton.addEventListener("click", checkCurrentTask);
       elements.nextButton.addEventListener("click", advanceStep);
       elements.toggleMotion.addEventListener("click", toggleMotion);
       elements.resetButton.addEventListener("click", resetApp);
