@@ -1,0 +1,56 @@
+@media print {
+  body {
+    background: white;
+    color: black;
+    font-family: Georgia, serif;
+  }
+
+  .page-shell {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: white;
+    backdrop-filter: none;
+  }
+
+  .hero-actions,
+  #toggle-motion,
+  #reset-app,
+  .lesson-actions,
+  .canvas-shell,
+  .visual-panel,
+  .topic-nav,
+  .controls-panel {
+    display: none !important;
+  }
+
+  .panel {
+    border: 1px solid #ccc;
+    border-radius: 0;
+    background: white;
+    box-shadow: none;
+    break-inside: avoid;
+    margin-bottom: 12px;
+  }
+
+  .lesson-task {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+  }
+
+  .choice-button {
+    border: 1px solid #ccc;
+    background: white;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .hint-box, .solution-box {
+    display: none;
+  }
+
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.2rem; }
+}
